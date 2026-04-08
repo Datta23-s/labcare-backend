@@ -1,13 +1,14 @@
 const { Op } = require('sequelize');
-const { Issue, User, Lab } = require('../models');
+const { Issue, User, Lab, PC } = require('../models');
 const { generateTicketId } = require('../services/ticketService');
 const { sendNotification } = require('../services/socketService');
+const { updateLabPCCounts } = require('./pcController');
 const { sendIssueUpdateEmail } = require('../services/emailService');
 
 // POST /api/v1/issues — Report a new issue
 exports.createIssue = async (req, res) => {
   try {
-    const { lab_id, type, priority, description } = req.body;
+    const { lab_id, type, priority, description, pc_number } = req.body;
 
     if (!lab_id || !type || !description) {
       return res.status(400).json({ message: 'lab_id, type, and description are required.' });
@@ -24,15 +25,28 @@ exports.createIssue = async (req, res) => {
       priority: priority || 'medium',
       description,
       image_url,
-      status: 'open'
+      status: 'open',
+      pc_number: pc_number || null
     });
+
+    // Auto-update PC status if pc_number is provided
+    if (pc_number) {
+      const pc = await PC.findOne({ where: { lab_id, pc_number } });
+      if (pc) {
+        pc.status = 'not_working';
+        pc.problem = description;
+        pc.last_reported_by = req.user.id;
+        await pc.save();
+        await updateLabPCCounts(lab_id);
+      }
+    }
 
     // Notify lab assistant if assigned to this lab
     const lab = await Lab.findByPk(lab_id);
     if (lab && lab.assigned_assistant) {
       await sendNotification(lab.assigned_assistant, {
         title: 'New Issue Reported',
-        message: `Issue ${ticket_id} reported in ${lab.name}: ${description.substring(0, 100)}`,
+        message: `Issue ${ticket_id} reported in ${lab.name}${pc_number ? ' (' + pc_number + ')' : ''}: ${description.substring(0, 100)}`,
         type: 'assignment',
         link: `/issues/${issue.id}`
       });

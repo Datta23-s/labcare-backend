@@ -66,6 +66,11 @@ const Issue = sequelize.define('Issue', {
   remarks: {
     type: DataTypes.TEXT,
     allowNull: true
+  },
+  pc_number: {
+    type: DataTypes.STRING(10),
+    allowNull: true,
+    comment: 'PC number affected (e.g. PC-01)'
   }
 }, {
   tableName: 'issues',

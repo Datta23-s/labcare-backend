@@ -22,6 +22,21 @@ const Lab = sequelize.define('Lab', {
   assigned_assistant: {
     type: DataTypes.INTEGER,
     allowNull: true
+  },
+  total_pcs: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 30
+  },
+  working_pcs: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 30
+  },
+  not_working_pcs: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
   }
 }, {
   tableName: 'labs',

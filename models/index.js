@@ -4,6 +4,7 @@ const Issue = require('./Issue');
 const Schedule = require('./Schedule');
 const MaintenanceLog = require('./MaintenanceLog');
 const Notification = require('./Notification');
+const PC = require('./PC');
 
 // ── Associations ──
 
@@ -43,11 +44,22 @@ MaintenanceLog.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
 Notification.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 User.hasMany(Notification, { foreignKey: 'user_id', as: 'notifications' });
 
+// PC ↔ Lab
+PC.belongsTo(Lab, { foreignKey: 'lab_id', as: 'lab' });
+Lab.hasMany(PC, { foreignKey: 'lab_id', as: 'pcs' });
+
+// PC → Last reporter (student)
+PC.belongsTo(User, { foreignKey: 'last_reported_by', as: 'lastReporter' });
+
+// PC → Last updater (admin/assistant)
+PC.belongsTo(User, { foreignKey: 'last_updated_by', as: 'lastUpdater' });
+
 module.exports = {
   User,
   Lab,
   Issue,
   Schedule,
   MaintenanceLog,
-  Notification
+  Notification,
+  PC
 };
