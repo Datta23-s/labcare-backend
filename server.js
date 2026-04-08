@@ -36,6 +36,10 @@ app.use(cors({
   origin: '*',
   credentials: true
 }));
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(uploadDir));
@@ -134,9 +138,10 @@ const seedDatabase = async () => {
     for (let i = 0; i < allLabs.length; i++) {
       const name = assistantNames[i] || `Lab Assistant ${i + 1}`;
       const emailName = name.toLowerCase().replace(/\s+/g, '.').replace(/&/g, '');
+      const email = i === 0 ? 'assistant@labcare.com' : `${emailName}@labcare.com`;
       const assistant = await User.create({
         name,
-        email: `${emailName}@labcare.com`,
+        email,
         password_hash: hash,
         role: 'lab_assistant',
         lab_id: allLabs[i].id
@@ -305,7 +310,7 @@ const seedDatabase = async () => {
     console.log('');
     console.log('📋 Demo Accounts:');
     console.log('   Admin:         admin@labcare.com / password123');
-    console.log('   Lab Assistant: rajesh.kumar@labcare.com / password123');
+    console.log('   Lab Assistant: assistant@labcare.com / password123');
     console.log('   Lab Assistant: priya.sharma@labcare.com / password123');
     console.log('   Student:       sarthak@student.com / password123');
     console.log('   Student:       ananya@student.com / password123');

@@ -9,10 +9,8 @@ exports.getPCsByLab = async (req, res) => {
     });
     if (!lab) return res.status(404).json({ message: 'Lab not found.' });
 
-    // Lab assistant can only see their own lab
-    if (req.user.role === 'lab_assistant' && req.user.lab_id !== lab.id) {
-      return res.status(403).json({ message: 'Access denied. You can only view your assigned lab.' });
-    }
+    // We now allow lab_assistants to browse other labs (read-only). 
+    // updatePC will independently block them from editing other labs.
 
     const pcs = await PC.findAll({
       where: { lab_id: labId },

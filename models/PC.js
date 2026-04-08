@@ -48,7 +48,7 @@ const PC = sequelize.define('PC', {
   timestamps: true,
   indexes: [
     {
-      unique: true,
+      unique: false,
       fields: ['lab_id', 'pc_number']
     }
   ]

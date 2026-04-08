@@ -7,7 +7,7 @@ router.use(authenticate);
 
 router.get('/', labController.getLabs);
 router.get('/:id', labController.getLabById);
-router.post('/', roleGuard('admin'), labController.createLab);
+router.post('/', roleGuard('admin', 'lab_assistant'), labController.createLab);
 router.put('/:id', roleGuard('admin'), labController.updateLab);
 router.delete('/:id', roleGuard('admin'), labController.deleteLab);
 
