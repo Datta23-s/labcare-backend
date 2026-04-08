@@ -25,13 +25,20 @@ const io = new Server(server, {
 initSocket(io);
 
 // Middleware
+const fs = require('fs');
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+  console.log('📁 Created uploads directory');
+}
+
 app.use(cors({
   origin: '*',
   credentials: true
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(uploadDir));
 
 // API Routes
 app.use('/api/v1/auth', require('./routes/auth'));
@@ -258,14 +265,17 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   try {
     // Test database connection
+    console.log(`🔌 Connecting to database (Dialect: ${sequelize.getDialect()})...`);
     await sequelize.authenticate();
-    console.log('✅ MySQL connected.');
+    console.log(`✅ ${sequelize.getDialect().toUpperCase()} connected.`);
 
-    // Sync models (creates tables if not exist)
+    // Sync models
+    console.log('🔄 Syncing database models...');
     await sequelize.sync({ alter: true });
-    console.log('✅ Database synced.');
+    console.log('✅ Database models synced.');
 
     // Seed data
+    console.log('🌱 Checking for seed data...');
     await seedDatabase();
 
     server.listen(PORT, () => {

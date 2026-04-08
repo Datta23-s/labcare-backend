@@ -50,7 +50,10 @@ exports.register = async (req, res) => {
     });
   } catch (error) {
     console.error('Register error:', error);
-    res.status(500).json({ message: 'Server error.' });
+    res.status(500).json({ 
+      message: 'Server error during registration.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined 
+    });
   }
 };
 
@@ -100,7 +103,10 @@ exports.login = async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ message: 'Server error.' });
+    res.status(500).json({ 
+      message: 'Server error during login.',
+      error: error.message // Always include message for now to debug Render
+    });
   }
 };
 

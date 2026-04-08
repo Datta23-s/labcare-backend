@@ -29,9 +29,13 @@ if (process.env.DB_HOST && process.env.DB_NAME) {
   );
 } else {
   // SQLite fallback — zero config, works anywhere
+  const sqlitePath = path.isAbsolute(process.env.SQLITE_PATH || '')
+    ? process.env.SQLITE_PATH
+    : path.join(__dirname, '..', 'labcare.sqlite');
+    
   sequelize = new Sequelize({
     dialect: 'sqlite',
-    storage: path.join(__dirname, '..', 'labcare.sqlite'),
+    storage: sqlitePath,
     logging: false,
     define: {
       timestamps: true,
