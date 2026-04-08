@@ -3,6 +3,10 @@ const jwt = require('jsonwebtoken');
 const { User, Lab } = require('../models');
 const { validationResult } = require('express-validator');
 
+// Ensure JWT_SECRET is always available
+const JWT_SECRET = process.env.JWT_SECRET || 'labcare_fallback_secret_key_2024';
+const JWT_EXPIRES = process.env.JWT_EXPIRES_IN || '7d';
+
 // POST /api/v1/auth/register
 exports.register = async (req, res) => {
   try {
@@ -34,8 +38,8 @@ exports.register = async (req, res) => {
     // Generate token
     const token = jwt.sign(
       { id: user.id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES }
     );
 
     res.status(201).json({
@@ -52,7 +56,7 @@ exports.register = async (req, res) => {
     console.error('Register error:', error);
     res.status(500).json({ 
       message: 'Server error during registration.',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined 
+      error: error.message
     });
   }
 };
@@ -85,8 +89,8 @@ exports.login = async (req, res) => {
     // Generate token
     const token = jwt.sign(
       { id: user.id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES }
     );
 
     res.json({
@@ -105,7 +109,7 @@ exports.login = async (req, res) => {
     console.error('Login error:', error);
     res.status(500).json({ 
       message: 'Server error during login.',
-      error: error.message // Always include message for now to debug Render
+      error: error.message
     });
   }
 };

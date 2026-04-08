@@ -1,6 +1,8 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
+const isPostgres = sequelize.getDialect() === 'postgres';
+
 const Issue = sequelize.define('Issue', {
   id: {
     type: DataTypes.INTEGER,
@@ -21,13 +23,23 @@ const Issue = sequelize.define('Issue', {
     allowNull: false
   },
   type: {
-    type: DataTypes.ENUM('hardware', 'software', 'network', 'electrical', 'other'),
-    allowNull: false
+    type: isPostgres
+      ? DataTypes.STRING(20)
+      : DataTypes.ENUM('hardware', 'software', 'network', 'electrical', 'other'),
+    allowNull: false,
+    validate: {
+      isIn: [['hardware', 'software', 'network', 'electrical', 'other']]
+    }
   },
   priority: {
-    type: DataTypes.ENUM('low', 'medium', 'high', 'critical'),
+    type: isPostgres
+      ? DataTypes.STRING(20)
+      : DataTypes.ENUM('low', 'medium', 'high', 'critical'),
     allowNull: false,
-    defaultValue: 'medium'
+    defaultValue: 'medium',
+    validate: {
+      isIn: [['low', 'medium', 'high', 'critical']]
+    }
   },
   description: {
     type: DataTypes.TEXT,
@@ -38,9 +50,14 @@ const Issue = sequelize.define('Issue', {
     allowNull: true
   },
   status: {
-    type: DataTypes.ENUM('open', 'in_progress', 'resolved', 'closed'),
+    type: isPostgres
+      ? DataTypes.STRING(20)
+      : DataTypes.ENUM('open', 'in_progress', 'resolved', 'closed'),
     allowNull: false,
-    defaultValue: 'open'
+    defaultValue: 'open',
+    validate: {
+      isIn: [['open', 'in_progress', 'resolved', 'closed']]
+    }
   },
   assigned_to: {
     type: DataTypes.INTEGER,

@@ -1,6 +1,8 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
+const isPostgres = sequelize.getDialect() === 'postgres';
+
 const MaintenanceLog = sequelize.define('MaintenanceLog', {
   id: {
     type: DataTypes.INTEGER,
@@ -12,8 +14,13 @@ const MaintenanceLog = sequelize.define('MaintenanceLog', {
     allowNull: false
   },
   type: {
-    type: DataTypes.ENUM('preventive', 'corrective', 'upgrade'),
-    allowNull: false
+    type: isPostgres
+      ? DataTypes.STRING(20)
+      : DataTypes.ENUM('preventive', 'corrective', 'upgrade'),
+    allowNull: false,
+    validate: {
+      isIn: [['preventive', 'corrective', 'upgrade']]
+    }
   },
   description: {
     type: DataTypes.TEXT,

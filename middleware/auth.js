@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
 
+const JWT_SECRET = process.env.JWT_SECRET || 'labcare_fallback_secret_key_2024';
+
 // Verify JWT token and attach user to request
 const authenticate = async (req, res, next) => {
   try {
@@ -10,7 +12,7 @@ const authenticate = async (req, res, next) => {
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET);
 
     const user = await User.findByPk(decoded.id, {
       attributes: { exclude: ['password_hash'] }

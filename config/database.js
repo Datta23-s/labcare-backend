@@ -4,8 +4,31 @@ const path = require('path');
 
 let sequelize;
 
-// Try MySQL first, fall back to SQLite
-if (process.env.DB_HOST && process.env.DB_NAME) {
+// Priority: DATABASE_URL > MySQL config > SQLite fallback
+if (process.env.DATABASE_URL) {
+  // PostgreSQL via connection string (Neon, Supabase, Render, etc.)
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: 'postgres',
+    logging: false,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    },
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000
+    },
+    define: {
+      timestamps: true,
+      underscored: true
+    }
+  });
+} else if (process.env.DB_HOST && process.env.DB_NAME) {
+  // MySQL explicit config
   sequelize = new Sequelize(
     process.env.DB_NAME || 'labcare_db',
     process.env.DB_USER || 'root',
@@ -28,14 +51,10 @@ if (process.env.DB_HOST && process.env.DB_NAME) {
     }
   );
 } else {
-  // SQLite fallback — zero config, works anywhere
-  const sqlitePath = path.isAbsolute(process.env.SQLITE_PATH || '')
-    ? process.env.SQLITE_PATH
-    : path.join(__dirname, '..', 'labcare.sqlite');
-    
+  // SQLite fallback — zero config, works for local dev
   sequelize = new Sequelize({
     dialect: 'sqlite',
-    storage: sqlitePath,
+    storage: path.join(__dirname, '..', 'labcare.sqlite'),
     logging: false,
     define: {
       timestamps: true,

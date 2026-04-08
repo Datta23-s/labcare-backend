@@ -1,6 +1,8 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
+const isPostgres = sequelize.getDialect() === 'postgres';
+
 const Schedule = sequelize.define('Schedule', {
   id: {
     type: DataTypes.INTEGER,
@@ -12,8 +14,13 @@ const Schedule = sequelize.define('Schedule', {
     allowNull: false
   },
   day: {
-    type: DataTypes.ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'),
-    allowNull: false
+    type: isPostgres
+      ? DataTypes.STRING(20)
+      : DataTypes.ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'),
+    allowNull: false,
+    validate: {
+      isIn: [['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']]
+    }
   },
   start_time: {
     type: DataTypes.TIME,

@@ -1,6 +1,8 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
+const isPostgres = sequelize.getDialect() === 'postgres';
+
 const User = sequelize.define('User', {
   id: {
     type: DataTypes.INTEGER,
@@ -22,9 +24,14 @@ const User = sequelize.define('User', {
     allowNull: false
   },
   role: {
-    type: DataTypes.ENUM('student', 'lab_assistant', 'admin'),
+    type: isPostgres 
+      ? DataTypes.STRING(20) 
+      : DataTypes.ENUM('student', 'lab_assistant', 'admin'),
     allowNull: false,
-    defaultValue: 'student'
+    defaultValue: 'student',
+    validate: {
+      isIn: [['student', 'lab_assistant', 'admin']]
+    }
   },
   lab_id: {
     type: DataTypes.INTEGER,
